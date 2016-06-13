@@ -213,6 +213,7 @@ fi
 * Mon Jun 13 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
 - Disable Lua support
+- Don't try to use system-wide crypto-policies, not present in EL
 
 * Fri Jun 03 2016 Ryan O'Hara <rohara@redhat.com> - 1.6.5-2
 - Utilize system-wide crypto-policies (#1256253)
