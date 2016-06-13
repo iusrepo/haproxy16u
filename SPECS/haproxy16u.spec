@@ -188,8 +188,10 @@ fi
 
 
 %files
+%{!?_licensedir:%global license %%doc}
+%license LICENSE
 %doc doc/* examples/*
-%doc CHANGELOG LICENSE README ROADMAP VERSION
+%doc CHANGELOG README ROADMAP VERSION
 %dir %{haproxy_confdir}
 %dir %{haproxy_datadir}
 %{haproxy_datadir}/*
@@ -214,6 +216,7 @@ fi
 - Port from Fedora to IUS
 - Disable Lua support
 - Don't try to use system-wide crypto-policies, not present in EL
+- Mark LICENSE as %%license when possible
 
 * Fri Jun 03 2016 Ryan O'Hara <rohara@redhat.com> - 1.6.5-2
 - Utilize system-wide crypto-policies (#1256253)
