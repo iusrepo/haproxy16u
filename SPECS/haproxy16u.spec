@@ -12,6 +12,8 @@
 %bcond_with systemd
 %endif
 
+%bcond_with lua
+
 Name:           haproxy16u
 Version:        1.6.5
 Release:        1.ius%{?dist}
@@ -32,7 +34,10 @@ Source6:        haproxy.init
 Patch0:         halog-unused-variables.patch
 Patch1:         iprange-return-type.patch
 
-BuildRequires:  lua-devel
+%if %{with lua}
+# src/hlua.c: "Requires Lua 5.3 or later."
+BuildRequires:  lua-devel >= 5.3
+%endif
 BuildRequires:  pcre-devel
 BuildRequires:  zlib-devel
 BuildRequires:  openssl-devel
@@ -84,7 +89,17 @@ regparm_opts=
 regparm_opts="USE_REGPARM=1"
 %endif
 
-%{__make} %{?_smp_mflags} CPU="generic" TARGET="linux2628" USE_OPENSSL=1 USE_PCRE=1 USE_ZLIB=1 USE_LUA=1 ${regparm_opts} ADDINC="%{optflags}" USE_LINUX_TPROXY=1 ADDLIB="%{__global_ldflags}"
+%{__make} %{?_smp_mflags} \
+    CPU="generic" \
+    TARGET="linux2628" \
+    USE_OPENSSL=1 \
+    USE_PCRE=1 \
+    USE_ZLIB=1 \
+%{?with_lua: USE_LUA=1} \
+    ${regparm_opts} \
+    ADDINC="%{optflags}" \
+    USE_LINUX_TPROXY=1 \
+    ADDLIB="%{?__global_ldflags}"
 
 pushd contrib/halog
 %{__make} ${halog} OPTIMIZE="%{optflags}"
@@ -197,6 +212,7 @@ fi
 %changelog
 * Mon Jun 13 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
+- Disable Lua support
 
 * Fri Jun 03 2016 Ryan O'Hara <rohara@redhat.com> - 1.6.5-2
 - Utilize system-wide crypto-policies (#1256253)
