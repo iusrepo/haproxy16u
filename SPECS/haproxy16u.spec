@@ -6,21 +6,28 @@
 
 %global _hardened_build 1
 
-Name:           haproxy
+%if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
+%bcond_without systemd
+%else
+%bcond_with systemd
+%endif
+
+Name:           haproxy16u
 Version:        1.6.5
-Release:        2%{?dist}
+Release:        1.ius%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 Group:          System Environment/Daemons
 License:        GPLv2+
 
 URL:            http://www.haproxy.org/
-Source0:        http://www.haproxy.org/download/1.5/src/haproxy-%{version}.tar.gz
-Source1:        %{name}.service
-Source2:        %{name}.cfg
-Source3:        %{name}.logrotate
-Source4:	%{name}.sysconfig
+Source0:        http://www.haproxy.org/download/1.6/src/haproxy-%{version}.tar.gz
+Source1:        haproxy.service
+Source2:        haproxy.cfg
+Source3:        haproxy.logrotate
+Source4:        haproxy.sysconfig
 Source5:        halog.1
+Source6:        haproxy.init
 
 Patch0:         halog-unused-variables.patch
 Patch1:         iprange-return-type.patch
@@ -29,12 +36,26 @@ BuildRequires:  lua-devel
 BuildRequires:  pcre-devel
 BuildRequires:  zlib-devel
 BuildRequires:  openssl-devel
+%if %{with systemd}
 BuildRequires:  systemd-units
+%endif
 
 Requires(pre):      shadow-utils
+%if %{with systemd}
 Requires(post):     systemd
 Requires(preun):    systemd
 Requires(postun):   systemd
+%else
+Requires(post):     chkconfig
+Requires(preun):    chkconfig
+Requires(preun):    initscripts
+Requires(postun):   initscripts
+%endif
+
+Provides:       haproxy = %{version}-%{release}
+Provides:       haproxy%{?_isa} = %{version}-%{release}
+Conflicts:      haproxy < %{version}-%{release}
+
 
 %description
 HAProxy is a TCP/HTTP reverse proxy which is particularly suited for high
@@ -50,10 +71,12 @@ availability environments. Indeed, it can:
  - report detailed status to authenticated users from a URI
    intercepted from the application
 
+
 %prep
-%setup -q
+%setup -q -n haproxy-%{version}
 %patch0 -p0
 %patch1 -p0
+
 
 %build
 regparm_opts=
@@ -71,14 +94,19 @@ pushd contrib/iprange
 %{__make} iprange OPTIMIZE="%{optflags}"
 popd
 
+
 %install
 %{__make} install-bin DESTDIR=%{buildroot} PREFIX=%{_prefix} TARGET="linux2628"
 %{__make} install-man DESTDIR=%{buildroot} PREFIX=%{_prefix}
 
-%{__install} -p -D -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
-%{__install} -p -D -m 0644 %{SOURCE2} %{buildroot}%{haproxy_confdir}/%{name}.cfg
-%{__install} -p -D -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
-%{__install} -p -D -m 0644 %{SOURCE4} %{buildroot}%{_sysconfdir}/sysconfig/%{name}
+%if %{with systemd}
+%{__install} -p -D -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/haproxy.service
+%else
+%{__install} -p -D -m 0755 %{SOURCE6} %{buildroot}%{_initrddir}/haproxy
+%endif
+%{__install} -p -D -m 0644 %{SOURCE2} %{buildroot}%{haproxy_confdir}/haproxy.cfg
+%{__install} -p -D -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/haproxy
+%{__install} -p -D -m 0644 %{SOURCE4} %{buildroot}%{_sysconfdir}/sysconfig/haproxy
 %{__install} -p -D -m 0644 %{SOURCE5} %{buildroot}%{_mandir}/man1/halog.1
 %{__install} -d -m 0755 %{buildroot}%{haproxy_home}
 %{__install} -d -m 0755 %{buildroot}%{haproxy_datadir}
@@ -103,6 +131,7 @@ do
     %{__rm} -f $textfile.old
 done
 
+
 %pre
 getent group %{haproxy_group} >/dev/null || \
     groupadd -r %{haproxy_group}
@@ -111,34 +140,64 @@ getent passwd %{haproxy_user} >/dev/null || \
     -s /sbin/nologin -c "haproxy" %{haproxy_user}
 exit 0
 
+
 %post
-%systemd_post %{name}.service
+%if %{with systemd}
+%systemd_post haproxy.service
+%else
+if [ $1 -eq 1 ]; then
+    chkconfig --add haproxy &> /dev/null || :
+fi
+%endif
+
 
 %preun
-%systemd_preun %{name}.service
+%if %{with systemd}
+%systemd_preun haproxy.service
+%else
+if [ $1 -eq 0 ]; then
+    service haproxy stop &> /dev/null || :
+    chkconfig --del haproxy &> /dev/null || :
+fi
+%endif
+
 
 %postun
-%systemd_postun_with_restart %{name}.service
+%if %{with systemd}
+%systemd_postun_with_restart haproxy.service
+%else
+if [ $1 -ge 1 ]; then
+    service haproxy condrestart &> /dev/null || :
+fi
+%endif
+
 
 %files
-%defattr(-,root,root,-)
 %doc doc/* examples/*
 %doc CHANGELOG LICENSE README ROADMAP VERSION
 %dir %{haproxy_confdir}
 %dir %{haproxy_datadir}
 %{haproxy_datadir}/*
-%config(noreplace) %{haproxy_confdir}/%{name}.cfg
-%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
-%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-%{_unitdir}/%{name}.service
-%{_sbindir}/%{name}
-%{_sbindir}/%{name}-systemd-wrapper
+%config(noreplace) %{haproxy_confdir}/haproxy.cfg
+%config(noreplace) %{_sysconfdir}/logrotate.d/haproxy
+%config(noreplace) %{_sysconfdir}/sysconfig/haproxy
+%if %{with systemd}
+%{_unitdir}/haproxy.service
+%else
+%{_initrddir}/haproxy
+%endif
+%{_sbindir}/haproxy
+%{_sbindir}/haproxy-systemd-wrapper
 %{_bindir}/halog
 %{_bindir}/iprange
 %{_mandir}/man1/*
 %attr(-,%{haproxy_user},%{haproxy_group}) %dir %{haproxy_home}
 
+
 %changelog
+* Mon Jun 13 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
+- Port from Fedora to IUS
+
 * Fri Jun 03 2016 Ryan O'Hara <rohara@redhat.com> - 1.6.5-2
 - Utilize system-wide crypto-policies (#1256253)
 
