@@ -6,6 +6,8 @@
 
 %global _hardened_build 1
 
+%{!?__global_ldflags: %global __global_ldflags -Wl,-z,relro}
+
 %if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
 %bcond_without systemd
 %else
@@ -217,6 +219,7 @@ fi
 * Tue Jun 21 2016 Carl George <carl.george@rackspace.com> - 1.6.5-2.ius
 - Fix reqdeny causing random crashes (CVE-2016-5360, #1346672) (Fedora)
 - Import EL6 init script with proper sysconfig file support
+- Set __global_ldflags when undefined
 
 * Mon Jun 13 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
