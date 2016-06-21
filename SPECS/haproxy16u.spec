@@ -16,7 +16,7 @@
 
 Name:           haproxy16u
 Version:        1.6.5
-Release:        1.ius%{?dist}
+Release:        2.ius%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 Group:          System Environment/Daemons
@@ -33,6 +33,7 @@ Source6:        haproxy.init
 
 Patch0:         halog-unused-variables.patch
 Patch1:         iprange-return-type.patch
+Patch2:         fix-reqdeny-crash.patch
 
 %if %{with lua}
 # src/hlua.c: "Requires Lua 5.3 or later."
@@ -81,6 +82,7 @@ availability environments. Indeed, it can:
 %setup -q -n haproxy-%{version}
 %patch0 -p0
 %patch1 -p0
+%patch2 -p1
 
 
 %build
@@ -212,6 +214,9 @@ fi
 
 
 %changelog
+* Tue Jun 21 2016 Carl George <carl.george@rackspace.com> - 1.6.5-2.ius
+- Fix reqdeny causing random crashes (CVE-2016-5360, #1346672) (Fedora)
+
 * Mon Jun 13 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
 - Disable Lua support
