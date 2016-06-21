@@ -24,14 +24,16 @@ prog=$(basename $exec)
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
+cfgfile=/etc/$prog/$prog.cfg
+pidfile=/var/run/$prog.pid
 lockfile=/var/lock/subsys/haproxy
 
 check() {
-    $exec -c -V -f /etc/$prog/$prog.cfg
+    $exec -c -V -f $cfgfile $OPTIONS
 }
 
 start() {
-    $exec -c -q -f /etc/$prog/$prog.cfg
+    $exec -c -q -f $cfgfile $OPTIONS
     if [ $? -ne 0 ]; then
         echo "Errors in configuration file, check with $prog check."
         return 1
@@ -39,7 +41,7 @@ start() {
 
     echo -n $"Starting $prog: "
     # start it up here, usually something like "daemon $exec"
-    daemon $exec -D -f /etc/$prog/$prog.cfg $OPTIONS -p /var/run/$prog.pid
+    daemon $exec -D -f $cfgfile $OPTIONS -p $pidfile
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
@@ -57,7 +59,7 @@ stop() {
 }
 
 restart() {
-    $exec -c -q -f /etc/$prog/$prog.cfg
+    $exec -c -q -f $cfgfile $OPTIONS
     if [ $? -ne 0 ]; then
         echo "Errors in configuration file, check with $prog check."
         return 1
@@ -67,13 +69,13 @@ restart() {
 }
 
 reload() {
-    $exec -c -q -f /etc/$prog/$prog.cfg
+    $exec -c -q -f $cfgfile $OPTIONS
     if [ $? -ne 0 ]; then
         echo "Errors in configuration file, check with $prog check."
         return 1
     fi
     echo -n $"Reloading $prog: "
-    $exec -D -f /etc/$prog/$prog.cfg $OPTIONS -p /var/run/$prog.pid -sf $(cat /var/run/$prog.pid)
+    $exec -D -f $cfgfile $OPTIONS -p $pidfile -sf $(cat $pidfile)
     retval=$?
     echo
     return $retval

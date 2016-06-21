@@ -216,6 +216,7 @@ fi
 %changelog
 * Tue Jun 21 2016 Carl George <carl.george@rackspace.com> - 1.6.5-2.ius
 - Fix reqdeny causing random crashes (CVE-2016-5360, #1346672) (Fedora)
+- Import EL6 init script with proper sysconfig file support
 
 * Mon Jun 13 2016 Carl George <carl.george@rackspace.com> - 1.6.5-1.ius
 - Port from Fedora to IUS
