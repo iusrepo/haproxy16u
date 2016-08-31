@@ -17,7 +17,7 @@
 %bcond_with lua
 
 Name:           haproxy16u
-Version:        1.6.8
+Version:        1.6.9
 Release:        1.ius%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
@@ -214,6 +214,9 @@ fi
 
 
 %changelog
+* Wed Aug 31 2016 Carl George <carl.george@rackspace.com> - 1.6.9-1.ius
+- Latest upstream
+
 * Mon Aug 15 2016 Ben Harper <ben.harper@rackspace.com> - 1.6.8-1.ius
 - Latest upstream
 
