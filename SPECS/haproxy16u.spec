@@ -14,11 +14,11 @@
 %bcond_with systemd
 %endif
 
-%bcond_with lua
+%bcond_without lua
 
 Name:           haproxy16u
 Version:        1.6.11
-Release:        1.ius%{?dist}
+Release:        2.ius%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 Group:          System Environment/Daemons
@@ -38,7 +38,11 @@ Patch1:         iprange-return-type.patch
 
 %if %{with lua}
 # src/hlua.c: "Requires Lua 5.3 or later."
+%if 0%{?rhel}
+BuildRequires:  lua53u-devel
+%else
 BuildRequires:  lua-devel >= 5.3
+%endif
 %endif
 BuildRequires:  pcre-devel
 BuildRequires:  zlib-devel
@@ -97,7 +101,13 @@ regparm_opts="USE_REGPARM=1"
     USE_OPENSSL=1 \
     USE_PCRE=1 \
     USE_ZLIB=1 \
-%{?with_lua: USE_LUA=1} \
+%if %{with lua}
+    USE_LUA=1 \
+%if 0%{?rhel}
+    LUA_LIB_NAME=lua-5.3 \
+    LUA_INC=%{_includedir}/lua-5.3 \
+%endif
+%endif
     ${regparm_opts} \
     ADDINC="%{optflags}" \
     USE_LINUX_TPROXY=1 \
@@ -190,7 +200,6 @@ fi
 
 
 %files
-%{!?_licensedir:%global license %%doc}
 %license LICENSE
 %doc doc/* examples/*
 %doc CHANGELOG README ROADMAP VERSION
@@ -214,6 +223,9 @@ fi
 
 
 %changelog
+* Sat Jan 14 2017 Carl George <carl.george@rackspace.com> - 1.6.11-2.ius
+- Enable Lua support
+
 * Wed Dec 28 2016 Carl George <carl.george@rackspace.com> - 1.6.11-1.ius
 - Latest upstream
 
