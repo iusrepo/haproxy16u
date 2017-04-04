@@ -17,8 +17,8 @@
 %bcond_without lua
 
 Name:           haproxy16u
-Version:        1.6.11
-Release:        2.ius%{?dist}
+Version:        1.6.12
+Release:        1.ius%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 Group:          System Environment/Daemons
@@ -223,6 +223,9 @@ fi
 
 
 %changelog
+* Tue Apr 04 2017 Carl George <carl.george@rackspace.com> - 1.6.12-1.ius
+- Latest upstream
+
 * Sat Jan 14 2017 Carl George <carl.george@rackspace.com> - 1.6.11-2.ius
 - Enable Lua support
 
