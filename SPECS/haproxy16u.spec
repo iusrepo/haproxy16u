@@ -17,7 +17,7 @@
 %bcond_without lua
 
 Name:           haproxy16u
-Version:        1.6.12
+Version:        1.6.13
 Release:        1.ius%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
@@ -223,6 +223,11 @@ fi
 
 
 %changelog
+* Mon Jun 19 2017 Ben Harper <ben.harper@rackspace.com> - 1.16.13-1.ius
+- Latest upstream
+- update Source1 from Fedora:
+  http://pkgs.fedoraproject.org/cgit/rpms/haproxy.git/commit/?id=192031b90f3a831130279c0422db0cf891a3b40b
+
 * Tue Apr 04 2017 Carl George <carl.george@rackspace.com> - 1.6.12-1.ius
 - Latest upstream
 
