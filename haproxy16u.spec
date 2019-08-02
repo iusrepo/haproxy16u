@@ -16,7 +16,7 @@
 
 Name:           haproxy16u
 Version:        1.6.14
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 License:        GPLv2+
@@ -212,6 +212,9 @@ fi
 
 
 %changelog
+* Fri Aug 02 2019 Carl George <carl@george.computer> - 1.6.14-2
+- Rebuild for vendor tag
+
 * Wed Jan 03 2018 Ben Harper <ben.harper@rackspace.com> - 1.16.14-1.ius
 - Latest upstream
 - Remove Patch0 and Patch1, fixed upstream
