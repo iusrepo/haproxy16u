@@ -18,7 +18,7 @@
 
 Name:           haproxy16u
 Version:        1.6.14
-Release:        1.ius%{?dist}
+Release:        1%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 Group:          System Environment/Daemons
@@ -33,6 +33,7 @@ Source4:        haproxy.sysconfig
 Source5:        halog.1
 Source6:        haproxy.init
 
+BuildRequires:  gcc
 %if %{with lua}
 # src/hlua.c: "Requires Lua 5.3 or later."
 %if 0%{?rhel}
@@ -137,7 +138,7 @@ popd
 %{__install} -p -m 0755 ./contrib/iprange/iprange %{buildroot}%{_bindir}/iprange
 %{__install} -p -m 0644 ./examples/errorfiles/* %{buildroot}%{haproxy_datadir}
 
-for httpfile in $(find ./examples/errorfiles/ -type f) 
+for httpfile in $(find ./examples/errorfiles/ -type f)
 do
     %{__install} -p -m 0644 $httpfile %{buildroot}%{haproxy_datadir}
 done
