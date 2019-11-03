@@ -15,8 +15,8 @@
 %bcond_without lua
 
 Name:           haproxy16u
-Version:        1.6.14
-Release:        2%{?dist}
+Version:        1.6.15
+Release:        1%{?dist}
 Summary:        HAProxy reverse proxy for high availability environments
 
 License:        GPLv2+
@@ -212,6 +212,9 @@ fi
 
 
 %changelog
+* Sun Nov 03 2019 Carl George <carl@george.computer> - 1.6.15-1
+- Latest upstream
+
 * Fri Aug 02 2019 Carl George <carl@george.computer> - 1.6.14-2
 - Rebuild for vendor tag
 
